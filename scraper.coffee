@@ -13,7 +13,7 @@ builder      = new xml2js.Builder()
 #====== CLI Args ======
 setName     = process.argv[2]
 setLongName = process.argv[3]
-spoilerUrl         = process.argv[4]
+spoilerUrl  = process.argv[4]
 cardsPath   = process.argv[5]
 #======================
 
