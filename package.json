@@ -1,0 +1,12 @@
+{ "name"         : "mtgsalvation-spoiler-scraper",
+  "version"      : "0.0.1",
+  "description"  : "Grabs spoiler information off mtgsalvation.com",
+  "author"       : {"name"    : "Michael Black"},
+  "bin"          : {"mtg-spoiler" : "./scraper.js"},
+  "repository"   : "https://github.com/michaelblack/mtgsalvtion-spoiler-scraper.git",
+  "dependencies" : {"jquery"   : "1.8.3",
+                    "xml2js"   : "0.4.4",
+                    "entities" : "1.1.1",
+                    "q"        : "1.0.1"}
+}
+  
