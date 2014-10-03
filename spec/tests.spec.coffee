@@ -4,9 +4,6 @@ $ = require 'jquery'
 fs = require 'fs'
 
 spoilers = $ (fs.readFileSync __dirname + '/test.html').toString()
-db = 
-
-
 
 describe 'Helper Functions', () ->
     describe 'unique', () ->
