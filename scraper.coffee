@@ -10,11 +10,17 @@ parser       = new xml2js.Parser({trim: true})
 builder      = new xml2js.Builder()
 #===============================
 
+#====== Exports ======
+
+#=====================
+
 #====== CLI Args ======
-setName     = process.argv[2]
-setLongName = process.argv[3]
-spoilerUrl  = process.argv[4]
-cardsPath   = process.argv[5]
+###
+    that.setName     = process.argv[2]
+    that.setLongName = process.argv[3]
+    that.spoilerUrl  = process.argv[4]
+    that.cardsPath   = process.argv[5]
+###
 #======================
 
 
@@ -43,9 +49,9 @@ log = (message) -> (data) ->
 #========== Card Functions =============
 # parseDoc : element -> {set : <set info>, cards : [<card-info>]}
 # parses the mtgsalvation spoiler page dom to get the cards from it
-parseDoc = (html) ->
-    set : {name : [setName], longname : [setLongName]}
-    cards : $(html).find('.t-spoiler').map(() -> parseSpoiler this).toArray()
+parseDoc = (setInfo) -> (html) ->
+    set : {name : [setInfo.setName], longname : [setInfo.setLongName]}
+    cards : $(html).find('.t-spoiler').map(() -> parseSpoiler setInfo, this).toArray()
 
 # parseCost, parseType, parsePT, parseText, parsePicUrl : Element -> String
 # Rather straight-forward. Parses the cost, type, text, picture url or power/toughness of a spoilered card
@@ -72,7 +78,7 @@ costToColors = (cost) -> unique cost.split('').filter( (elem) -> (/[WUBRG]/).tes
 
 # parseSpoiler : Element -> <card-object>
 # parses and entire spoilered card into the appropriate object for the xml builder
-parseSpoiler = (elem) ->
+parseSpoiler = (setInfo, elem) ->
     name   = elem.id
     cost   = parseCost elem
     colors = costToColors(cost).map (color) ->  '_' : color
@@ -82,7 +88,7 @@ parseSpoiler = (elem) ->
     result = {}
     
     result.name = [name]
-    result.set = [{ '_' : setName}]
+    result.set = [{ '_' : setInfo.setName}]
     result.set[0]['$'] = {picURL : picURL} if picURL?
     result.color = colors if colors.length > 0
     result.manacost = [cost]
@@ -162,25 +168,30 @@ getWithRedirect = (url) ->
 #===============================
 
 #====== Main ======
-fetchSpoilers =
-    getWithRedirect spoilerUrl
+fetchSpoilers = (setInfo) ->
+    getWithRedirect setInfo.spoilerUrl
     .then log '* Fetched ' + spoilerUrl + ' ...'
-    .then parseDoc
+    .then parseDoc setInfo
     .then log '* Generated card information from the website ...'
 
-loadDatabase =
+loadDatabase = (cardsPath) ->
     loadFile cardsPath
     .then log '* Loaded ' + cardsPath + ' ...'
     .then parseXML
     .then log '* Parsed the card database ...'
 
-    
-q.all [fetchSpoilers, loadDatabase]
-.spread mergeSpoilers
-.then log '* Merged the fetched cards into the database ...'
-.then (data) -> fs.writeFileSync cardsPath, data
-.then log '* Wrote the file to disk ...'
-.fail console.log
-.done () ->
-    console.log '* Done!'
-    process.exit()
+main = (setInfo, cardsPath) -> 
+    q.all [fetchSpoilers setInfo, loadDatabase cardsPath]
+    .spread mergeSpoilers
+    .then log '* Merged the fetched cards into the database ...'
+    .then (data) -> fs.writeFileSync cardsPath, data
+    .then log '* Wrote the file to disk ...'
+    .fail console.log
+    .done () ->
+        console.log '* Done!'
+        process.exit()
+
+module.exports = testing :
+    unique : unique
+    find   : find
+    log    : log
