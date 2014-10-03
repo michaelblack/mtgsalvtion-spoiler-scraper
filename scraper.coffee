@@ -49,7 +49,7 @@ log = (message) -> (data) ->
 #========== Card Functions =============
 # parseDoc : element -> {set : <set info>, cards : [<card-info>]}
 # parses the mtgsalvation spoiler page dom to get the cards from it
-parseDoc = (setInfo) -> (html) ->
+parseDoc = (setInfo, html) ->
     set : {name : [setInfo.setName], longname : [setInfo.setLongName]}
     cards : $(html).find('.t-spoiler').map(() -> parseSpoiler setInfo, this).toArray()
 
@@ -171,7 +171,7 @@ getWithRedirect = (url) ->
 fetchSpoilers = (setInfo) ->
     getWithRedirect setInfo.spoilerUrl
     .then log '* Fetched ' + spoilerUrl + ' ...'
-    .then parseDoc setInfo
+    .then (data) -> parseDoc setInfo, data
     .then log '* Generated card information from the website ...'
 
 loadDatabase = (cardsPath) ->
@@ -191,7 +191,15 @@ main = (setInfo, cardsPath) ->
         console.log '* Done!'
         process.exit()
 
+setInfo = setName: process.argv[2]
+          setLongName: process.argv[3]
+          spoilerUrl: process.argv[4]
+
+main(setInfo, process.argv[5])
+
 module.exports = testing :
     unique : unique
     find   : find
     log    : log
+    parseDoc : parseDoc
+    
